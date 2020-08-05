@@ -1,7 +1,14 @@
 from flask import Flask, jsonify, request
 from flask_mysqldb import MySQL
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
+
+# Ruta por defecto.
+@app.route('/')
+def index():
+    return 'Index Page'
 
 # Ruta de prueba.
 @app.route('/ping', methods=['GET'])
@@ -15,7 +22,8 @@ def obtTareas():
     cur.execute('Select * From Tareas')
     data = cur.fetchall()
     cur.close()
-    return jsonify({'Tareas': data})
+    #return jsonify({'Tareas': data})
+    return jsonify({"tareas": data, "message": "Tareas's Records"})
 
 # Ruta para obtener un dato de la tabla.
 @app.route('/tareas/<int:idTarea>', methods=['GET'])
@@ -31,15 +39,17 @@ def obtTarea(idTarea):
 # Ruta para crear tarea pendiente.
 @app.route('/tareas', methods=['POST'])
 def agrTarea():
+    print(request.json['fecha'])
     cur = mysql.connection.cursor()
-    cur.execute("Insert Into Tareas (Descripcion, fecha, usuario, estado) VALUES (%s,%s,%s,%s)", 
-               (request.json['descripcion'], request.json['fecha'], 
+    cur.execute("Insert Into Tareas (Descripcion, fecha, usuario, estado) VALUES (%s,Current_TimeStamp,%s,%s)", 
+               (request.json['descripcion'], #request.json['fecha'], 
                 request.json['usuario'], request.json['estado']))
     mysql.connection.commit()
     cur.execute('Select * From Tareas')
     data = cur.fetchall()
     cur.close()
-    return jsonify({'Tareas': data})
+    #return jsonify({'Tareas': data})
+    return jsonify({"tareas": data, "message": "Tareas's Records"})
 
 # Ruta para actualizar tarea pendiente.
 @app.route('/tareas/<int:idTarea>', methods=['PUT'])
